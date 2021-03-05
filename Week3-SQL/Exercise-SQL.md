@@ -103,30 +103,37 @@ For this section of the exercise we will be using the `bigquery-public-data.aust
 
 1. Write a query that returns each zipcode and their population for 2000 and 2010. 
 	```
-	WITH 
-    2000_POP AS(
-        SELECT
-            zipcode,
-            SUM(population) AS population_2000
-        FROM
-            `bigquery-public-data.census_bureau_usa.population_by_zip_2000`
-        GROUP BY
-            zipcode
-    ),
-    2010_POP AS( 
-        SELECT
-          zipcode, 
-          SUM(population) AS population_2010
-        FROM 
-          `bigquery-public-data.census_bureau_usa,population_by_zip_2010`
-        GROUP BY 
-          zipcode
-      )
-
-      SELECT 
-        zipcode, population_2000, population_2010 
-      FROM 
-    
+	WITH
+      POP_2000 AS(
+      SELECT
+        zipcode AS zip2000,
+        SUM(population) AS population_2000
+      FROM
+        `bigquery-public-data.census_bureau_usa.population_by_zip_2000`
+      GROUP BY
+        zipcode ),
+        
+      #SECOND TABLE 
+      
+      POP_2010 AS(
+      SELECT
+        zipcode AS zip2010,
+        SUM(population) AS population_2010
+      FROM
+        `bigquery-public-data.census_bureau_usa.population_by_zip_2010`
+      GROUP BY
+        zipcode )
+        
+      #JOIN TABLES
+      
+      SELECT
+          zip2000,population_2000,population_2010
+      FROM
+          POP_2000
+      INNER JOIN
+          POP_2010
+      ON
+          zip2000 = zip2010
 	```
 
 ### For the next section, use the  `bigquery-public-data.google_political_ads.advertiser_weekly_spend` table.
@@ -259,12 +266,44 @@ For this section of the exercise we will be using the `bigquery-public-data.aust
 	```
 2. What was the average, shortest, and longest bike trip taken in minutes?
 	```
-	[YOUR QUERY HERE]
+	SELECT
+      AVG(tripduration)/60 AS avg_time,
+      MIN(tripduration)/60 AS shortest_trip,
+      MAX(tripduration)/60 AS longest_trip
+    FROM
+      `bigquery-public-data.new_york_citibike.citibike_trips`
 	```
 
 3. Write a query that, for every station_name, has the amount of trips that started there and the amount of trips that ended there. (Hint, use two temporary tables, one that counts the amount of starts, the other that counts the number of ends, and then join the two.) 
 	```
-	[YOUR QUERY HERE]
+	WITH
+      T_STARTED AS(
+      SELECT
+        start_station_name,
+        COUNT(start_station_name) AS start_station_count
+      FROM
+        `bigquery-public-data.new_york_citibike.citibike_trips`
+      GROUP BY
+        start_station_name ),
+        
+      #SECOND TABLE 
+
+      T_ENDED AS(
+      SELECT
+        end_station_name,
+        COUNT(end_station_name) AS end_station_count
+      FROM
+        `bigquery-public-data.new_york_citibike.citibike_trips`
+      GROUP BY
+        end_station_name )
+
+    SELECT
+      start_station_name,
+      start_station_count,
+      end_station_count
+    FROM T_STARTED
+    INNER JOIN T_ENDED ON
+      start_station_name = end_station_name
 	```
 # The next section is the Google Colab section.  
 1. Open up this [this Colab notebook](https://colab.research.google.com/drive/1kHdTtuHTPEaMH32GotVum41YVdeyzQ74?usp=sharing).
