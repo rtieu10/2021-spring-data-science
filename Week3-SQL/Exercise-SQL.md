@@ -103,31 +103,109 @@ For this section of the exercise we will be using the `bigquery-public-data.aust
 
 1. Write a query that returns each zipcode and their population for 2000 and 2010. 
 	```
-	[YOUR QUERY HERE]
+	WITH 
+    2000_POP AS(
+        SELECT
+            zipcode,
+            SUM(population) AS population_2000
+        FROM
+            `bigquery-public-data.census_bureau_usa.population_by_zip_2000`
+        GROUP BY
+            zipcode
+    ),
+    2010_POP AS( 
+        SELECT
+          zipcode, 
+          SUM(population) AS population_2010
+        FROM 
+          `bigquery-public-data.census_bureau_usa,population_by_zip_2010`
+        GROUP BY 
+          zipcode
+      )
+
+      SELECT 
+        zipcode, population_2000, population_2010 
+      FROM 
+    
 	```
 
 ### For the next section, use the  `bigquery-public-data.google_political_ads.advertiser_weekly_spend` table.
 1. Using the `advertiser_weekly_spend` table, write a query that finds the advertiser_name that spent the most in usd. 
 	```
-	[YOUR QUERY HERE]
+	SELECT
+      advertiser_name,
+      spend_usd
+    FROM
+      `bigquery-public-data.google_political_ads.advertiser_weekly_spend`
+    ORDER BY
+      spend_usd DESC
+    LIMIT
+      1
 	```
 2. Who was the 6th highest spender? (No need to insert query here, just type in the answer.)
 	```
-	[YOUR ANSWER HERE]
+    #SELECT - select the advertiser names, and sum up the money spent (sum_usd)
+    #ORDER BY - DESC (from highest to lowest) 
+	SELECT
+      advertiser_name,
+      SUM(spend_usd) AS sum_usd
+    FROM
+      `bigquery-public-data.google_political_ads.advertiser_weekly_spend`
+    GROUP BY 
+      advertiser_name
+    ORDER BY
+      sum_usd DESC
+    LIMIT
+      6
+      
+    SENATE LEADERSHIP FUND 
 	```
 
 3. What week_start_date had the highest spend? (No need to insert query here, just type in the answer.)
 	```
-	[YOUR ANSWER HERE]
+	SELECT
+      week_start_date,
+      spend_usd
+    FROM
+      `bigquery-public-data.google_political_ads.advertiser_weekly_spend`
+    ORDER BY
+      spend_usd DESC
+    
+    2020-10-18 had the highest weekly spend
 	```
 
 4. Using the `advertiser_weekly_spend` table, write a query that returns the sum of spend by week (using week_start_date) in usd for the month of August only. 
 	```
-	[YOUR QUERY HERE]
+	SELECT
+      week_start_date,
+        SUM(spend_usd) AS total_spent
+    FROM
+      `bigquery-public-data.google_political_ads.advertiser_weekly_spend`
+    WHERE
+      EXTRACT(month FROM week_start_date) = 8
+    GROUP BY
+      week_start_date
+
 	```
 6.  How many ads did the 'TOM STEYER 2020' campaign run? (No need to insert query here, just type in the answer.)
 	```
-	[YOUR ANSWER HERE]
+    #SELECT - columns we are selecting 
+    #COUNT - counting each advertiser 
+    #FROM - where pull data rom 
+    #WHERE - the condition that must be true 
+    #GROUP BY - what the rows are grouped by 
+    
+	SELECT
+      advertiser_name,
+      COUNT(advertiser_name) AS advertiser
+    FROM
+      `bigquery-public-data.google_political_ads.advertiser_weekly_spend`
+    WHERE
+      advertiser_name = "TOM STEYER 2020"
+    GROUP BY
+      advertiser_name
+
+    50 advertisements
 	```
 7. Write a query that has, in the US region only, the total spend in usd for each advertiser_name and how many ads they ran. (Hint, you're going to have to join tables for this one). 
 	```
@@ -135,11 +213,35 @@ For this section of the exercise we will be using the `bigquery-public-data.aust
 	```
 8. For each advertiser_name, find the average spend per ad. 
 	```
-	[YOUR QUERY HERE]
+	SELECT
+      advertiser_name,
+      AVG(spend_usd) as avg_spent
+    FROM
+      `bigquery-public-data.google_political_ads.advertiser_weekly_spend`
+    GROUP BY
+      advertiser_name
 	```
 10. Which advertiser_name had the lowest average spend per ad that was at least above 0. 
 	``` 
-	[YOUR QUERY HERE]
+	WITH
+     T AS(
+         SELECT
+           advertiser_name,
+           AVG(spend_usd) AS avg_spent
+         FROM
+           `bigquery-public-data.google_political_ads.advertiser_weekly_spend`
+         GROUP BY
+            advertiser_name
+         ORDER BY
+            avg_spent ASC )
+
+      #filter for averages greater than 0 
+  
+      SELECT * FROM T
+      WHERE
+        avg_spent > 0
+        
+     BRANDY K CHAMBERS 
 	```
 ## For this next section, use the `new_york_citibike` datasets.
 
